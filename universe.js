@@ -19,6 +19,7 @@ function start(count, size, fill, delay) {
 		creature.premature = JSON.parse(JSON.stringify(creature));
 		jungle.push(creature);
 	}
+	process.send({type: 'data', data: {jungle: jungle, generation: gen}});
 	timer = setInterval(generation, delay);
 }
 
@@ -46,6 +47,7 @@ function generation() {
 	}
 	// modify bodies
 	for (var i = 0; i < jungle.length; i++) {
+		var oldBody = [...jungle[i].body];
 		for (var j = 0; j < jungle[i].body.length; j++) {
 			for (var k = 0; k < jungle[i].body[j].length; k++) {
 				var neighbors = 0;
@@ -58,8 +60,8 @@ function generation() {
 					offset[1]--;
 					offset[0] += j;
 					offset[1] += k;
-					if (offset[0] >= 0 && offset[0] < jungle[i].body.length && offset[1] >= 0 && offset[1] < jungle[i].body[j].length) {
-						if (jungle[i].body[offset[0]][offset[1]]) neighbors++;
+					if (offset[0] >= 0 && offset[0] < oldBody.length && offset[1] >= 0 && offset[1] < oldBody[j].length) {
+						if (oldBody[offset[0]][offset[1]]) neighbors++;
 					}
 				}
 				var cell = jungle[i].body[j][k];
@@ -112,6 +114,5 @@ process.on('message', function (msg) {
 			break;
 		case 'stop':
 			clearInterval(timer);
-			// send jungle data
 	}
 });

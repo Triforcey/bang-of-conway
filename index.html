@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Bang of Conway</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="/styles/main.css">
+	<script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+	<div class="toolbar settings">
+		<input type="number" id="countInput" min="0" placeholder="Count">
+		<input type="number" id="widthInput" min="0" placeholder="Width">
+		<input type="number" id="heightInput" min="0" placeholder="Height">
+		<input type="number" id="fillInput" min="0" max="1" placeholder="Fill">
+		<input type="number" id="setGenInput" min="0" placeholder="Generations">
+		<input type="number" id="temperInput" min="0" max="1" placeholder="Temper">
+		<input type="number" id="mutationInput" min="0" max="1" placeholder="Mutation">
+		<input type="number" id="delayInput" min="0" placeholder="Temper">
+		<button>Send</button>
+	</div>
+	<div class="toolbar">
+		<input type="number" id="genInput" value="0" min="0" max="0">
+		<input type="range" id="genInputRange" value="0" min="0" max="0">
+	</div>
+	<script src="/scripts/main.js"></script>
+</body>
+</html>
