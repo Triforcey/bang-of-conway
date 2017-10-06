@@ -1,4 +1,4 @@
-var timer;
+var immediate = false;
 var jungle = [];
 var gen;
 var lastGen;
@@ -19,8 +19,8 @@ function start(count, size, fill, delay) {
 		creature.premature = JSON.parse(JSON.stringify(creature));
 		jungle.push(creature);
 	}
-	process.send({type: 'data', data: {jungle: jungle, generation: gen}});
-	timer = setInterval(generation, delay);
+	process.send({type: count > 0 ? 'data' : 'done', data: {jungle: jungle, generation: gen}});
+	immediate = setImmediate(generation);
 }
 
 function generation() {
@@ -95,17 +95,20 @@ function generation() {
 	gen++;
 	var data = {jungle: jungle, generation: gen};
 	if (lastGen >= 0 && gen >= lastGen) {
-		clearInterval(timer);
 		process.send({type: 'done', data: data});
+		immediate = false;
 	} else {
 		process.send({type: 'data', data: data});
+		immediate = setImmediate(generation);
 	}
 }
 
 process.on('message', function (msg) {
 	switch (msg.cmd) {
 		case 'start':
-			clearInterval(timer);
+			clearImmediate(immediate);
+			immediate = false;
+			jungle = [];
 			gen = 0;
 			lastGen = msg.generations;
 			temper = msg.temper;
@@ -113,6 +116,7 @@ process.on('message', function (msg) {
 			start(msg.count, msg.size, msg.fill, msg.delay);
 			break;
 		case 'stop':
-			clearInterval(timer);
+			clearImmediate(immediate);
+			immediate = false;
 	}
 });

@@ -4,6 +4,10 @@ html, body {
 	margin: 0;
 	padding: 0;
 }
+* {
+	outline: none;
+	-webkit-tap-highlight-color: none;
+}
 .toolbar {
 	margin: 5px;
 }
@@ -20,9 +24,9 @@ html, body {
 	width: 90px;
 }
 .settings button {
-	background: #e0e0e0;
+	background: #f0f0f0;
 	border: none;
-	border-radius: 5px;
+	border-radius: 2px;
 	box-shadow: 1px 1px 1px black;
 	margin: 0 0 5px 0;
 }
@@ -39,4 +43,17 @@ input[type=number] {
 #genInputRange {
 	flex: 1;
 	margin: 0 0 0 10px;
+}
+#creatureContainer {
+	text-align: center;
+}
+.creature {
+	margin: 10px;
+	display: inline-block;
+	width: 300px;
+	height: 300px;
+	max-width: calc(100% - 22px);
+	max-height: calc(100% - 22px);
+	border: solid black 2px;
+	padding: 5px;
 }
