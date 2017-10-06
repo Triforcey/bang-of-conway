@@ -55,6 +55,6 @@ function sendReq() {
 			return !isNaN(parseInt(e.value)) ? parseInt(e.value) : parseInt(e.min);
 		}
 	}
-	var req = {count: getVal(countInput), size: [getVal(widthInput), getVal(heightInput)], fill: getVal(fillInput, true), generations: getVal(setGenInput), temper: getVal(temperInput, true), mutation: getVal(mutationInput, true), delay: getVal(delayInput)};
+	var req = {count: getVal(countInput), size: [getVal(widthInput), getVal(heightInput)], fill: getVal(fillInput, true), generations: getVal(setGenInput), temper: getVal(temperInput, true), mutation: getVal(mutationInput, true)};
 	ws.emit('run', req);
 }

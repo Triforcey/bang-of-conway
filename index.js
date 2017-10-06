@@ -6,23 +6,32 @@ var childProcess = require('child_process');
 
 var universeData = [];
 var maxGen = 0;
-var universe = childProcess.fork('universe.js');
+var universe = false;
 var status = 'idle';
 function setStatus(newStatus) {
 	status = newStatus;
 	io.emit('status', status);
 }
-universe.on('message', function (msg) {
-	universeData.push(msg.data);
-	maxGen = msg.data.generation;
-	io.emit('maxGen', maxGen);
-	if (msg.type == 'done') setStatus('idle');
-});
+function runUniverse(settings) {
+	if (universe) universe.kill();
+	universe = childProcess.fork('universe.js');
+	universe.on('message', function (msg) {
+		universeData.push(msg.data);
+		maxGen = msg.data.generation;
+		io.emit('maxGen', maxGen);
+		if (msg.type == 'done') {
+			universe.kill();
+			universe = false;
+			setStatus('idle');
+		}
+	});
+	universe.send(settings);
+}
 
 io.on('connection', function (ws) {
 	ws.on('run', function (msg) {
 		if (msg.constructor != JSON.constructor) return;
-		var values = [['count', Number], ['size', Array], ['fill', Number], ['generations', Number], ['temper', Number], ['mutation', Number], ['delay', Number]];
+		var values = [['count', Number], ['size', Array], ['fill', Number], ['generations', Number], ['temper', Number], ['mutation', Number]];
 		for (var i = 0; i < values.length; i++) {
 			if (typeof msg[values[i][0]] == 'undefined' || msg[values[i][0]] === null || msg[values[i][0]].constructor != values[i][1]) return;
 		}
@@ -30,10 +39,9 @@ io.on('connection', function (ws) {
 		msg.size[0] = parseInt(msg.size[0]);
 		msg.size[1] = parseInt(msg.size[1]);
 		maxGen = 0;
-		universe.send({cmd: 'stop'});
 		universeData = [];
 		msg.cmd = 'start';
-		universe.send(msg);
+		runUniverse(msg);
 		setStatus('running');
 	});
 	ws.on('gen', function (msg) {

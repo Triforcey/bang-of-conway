@@ -4,7 +4,8 @@ var gen;
 var lastGen;
 var temper;
 var mutation;
-function start(count, size, fill, delay) {
+function start(count, size, fill) {
+	immediate = true;
 	for (var i = 0; i < count; i++) {
 		var creature = {body: [], mass: 0};
 		for (var j = 0; j < size[0]; j++) {
@@ -19,8 +20,8 @@ function start(count, size, fill, delay) {
 		creature.premature = JSON.parse(JSON.stringify(creature));
 		jungle.push(creature);
 	}
-	process.send({type: count > 0 ? 'data' : 'done', data: {jungle: jungle, generation: gen}});
-	immediate = setImmediate(generation);
+	process.send({type: lastGen != 0 ? 'data' : 'done', data: {jungle: jungle, generation: gen}});
+	if (lastGen != 0) immediate = setImmediate(generation);
 }
 
 function generation() {
@@ -81,6 +82,7 @@ function generation() {
 		var rookie = JSON.parse(JSON.stringify(jungle[i].premature));
 		for (var j = 0; j < rookie.body.length; j++) {
 			for (var k = 0; k < rookie.body[j].length; k++) {
+				if (!immediate) return;
 				if (Math.random() < mutation) {
 					rookie.body[j][k] = !rookie.body[j][k];
 					if (rookie.body[j][k]) rookie.mass++;
@@ -113,7 +115,7 @@ process.on('message', function (msg) {
 			lastGen = msg.generations;
 			temper = msg.temper;
 			mutation = msg.mutation;
-			start(msg.count, msg.size, msg.fill, msg.delay);
+			start(msg.count, msg.size, msg.fill);
 			break;
 		case 'stop':
 			clearImmediate(immediate);
