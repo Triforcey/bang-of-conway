@@ -39,7 +39,7 @@ io.on('connection', function (ws) {
 	ws.on('gen', function (msg) {
 		if (isNaN(msg)) return;
 		msg = parseInt(msg);
-		if (msg <= universeData.length) ws.emit('gen', universeData[msg].jungle);
+		if (msg < universeData.length) ws.emit('gen', universeData[msg].jungle);
 		else ws.emit('gen', null);
 	});
 	ws.emit('maxGen', maxGen);
