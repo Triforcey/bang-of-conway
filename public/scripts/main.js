@@ -8,7 +8,7 @@ function revSliderShare() {
 	genInput.value != '' ? gen = parseInt(genInput.value) : gen = 0;
 	if (gen > parseInt(genInput.max)) genInput.value = genInput.max;
 	genInputRange.value = gen;
-	ws.emit('gen', parseInt(genInput.value));
+	ws.emit('gen', [parseInt(genInput.value), parseInt(viewInput.value)]);
 }
 
 var ws = io('/');

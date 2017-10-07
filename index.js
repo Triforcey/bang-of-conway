@@ -15,14 +15,37 @@ function setStatus(newStatus) {
 function runUniverse(settings) {
 	if (universe) universe.kill();
 	universe = childProcess.fork('universe.js');
+	var construct;
+	var lengths = [];
 	universe.on('message', function (msg) {
-		universeData.push(msg.data);
-		maxGen = msg.data.generation;
-		io.emit('maxGen', maxGen);
-		if (msg.type == 'done') {
-			universe.kill();
-			universe = false;
-			setStatus('idle');
+		switch (msg.type) {
+			case 'init':
+				construct = msg.data;
+				break;
+			case 'data':
+				if (!lengths.length) {
+					construct.jungle.push(msg.data);
+					lengths.push(msg.data.mass);
+				} else {
+					for (var i = 0; i < lengths.length; i++) {
+						if (msg.data.mass >= lengths[i] || i >= lengths.length - 1) {
+							construct.jungle.splice(i, 0, msg.data);
+							lengths.splice(i, 0, msg.data.mass);
+							break;
+						}
+					}
+				}
+				break;
+			case 'end':
+				universeData.push(construct);
+				maxGen = construct.generation;
+				lengths = [];
+				io.emit('maxGen', maxGen);
+				break;
+			case 'finished':
+				universe.kill();
+				universe = false;
+				setStatus('idle');
 		}
 	});
 	universe.send(settings);
@@ -30,14 +53,14 @@ function runUniverse(settings) {
 
 io.on('connection', function (ws) {
 	ws.on('run', function (msg) {
-		if (msg.constructor != JSON.constructor) return;
+		if (msg == null || msg.constructor != JSON.constructor) return;
 		var values = [['count', Number], ['size', Array], ['fill', Number], ['generations', Number], ['temper', Number], ['mutation', Number]];
 		for (var i = 0; i < values.length; i++) {
 			if (typeof msg[values[i][0]] == 'undefined' || msg[values[i][0]] === null || msg[values[i][0]].constructor != values[i][1]) return;
 		}
 		if (msg.size.length != 2 || isNaN(msg.size[0]) || isNaN(msg.size[1])) return;
-		msg.size[0] = parseInt(msg.size[0]);
-		msg.size[1] = parseInt(msg.size[1]);
+		msg.size[0] = Math.abs(parseInt(msg.size[0]));
+		msg.size[1] = Math.abs(parseInt(msg.size[1]));
 		maxGen = 0;
 		universeData = [];
 		msg.cmd = 'start';
@@ -45,14 +68,24 @@ io.on('connection', function (ws) {
 		setStatus('running');
 	});
 	ws.on('gen', function (msg) {
-		if (isNaN(msg)) return;
-		msg = parseInt(msg);
-		if (msg < universeData.length) ws.emit('gen', universeData[msg].jungle);
+		if (msg == null || msg.constructor != Array || msg.length != 2 || isNaN(parseInt(msg[0])) || isNaN(parseInt(msg[1]))) return;
+		msg[0] = Math.abs(parseInt(msg[0]));
+		msg[1] = parseInt(msg[1]);
+		if (msg[0] < universeData.length) {
+			var res = [...universeData[msg[0]].jungle];
+			if (msg[1] < 0) {
+				msg[1] = -msg[1];
+				res.reverse();
+			}
+			if (msg[1] > 0) {
+				res.splice(msg[1], res.length - msg[1]);
+			}
+			ws.emit('gen', res);
+		}
 		else ws.emit('gen', null);
 	});
 	ws.emit('maxGen', maxGen);
 	ws.emit('status', status);
-	if (universeData.length > 0) ws.emit('gen', universeData[0].jungle);
 });
 
 app.use(express.static('public'));

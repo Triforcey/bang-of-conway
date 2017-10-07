@@ -4,6 +4,21 @@ var gen;
 var lastGen;
 var temper;
 var mutation;
+function send(msg) {
+	var init = {jungle: [], generation: msg.generation};
+	if (typeof msg.jungle != 'undefined') {
+		for (var i = 0; i < msg.jungle.length; i++) {
+			if (i == 0) {
+				init.jungle.push(msg.jungle[i]);
+				process.send({type: 'init', data: init});
+			} else {
+				process.send({type: 'data', data: msg.jungle[i]});
+			}
+		}
+	}
+	process.send({type: 'end'});
+	if (lastGen >= 0 && gen >= lastGen) process.send({type: 'finished'});
+}
 function start(count, size, fill) {
 	immediate = true;
 	for (var i = 0; i < count; i++) {
@@ -20,7 +35,7 @@ function start(count, size, fill) {
 		creature.premature = JSON.parse(JSON.stringify(creature));
 		jungle.push(creature);
 	}
-	process.send({type: lastGen != 0 ? 'data' : 'done', data: {jungle: jungle, generation: gen}});
+	send({jungle: jungle, generation: gen});
 	if (lastGen != 0) immediate = setImmediate(generation);
 }
 
@@ -95,12 +110,10 @@ function generation() {
 	}
 	jungle.push(...rookies);
 	gen++;
-	var data = {jungle: jungle, generation: gen};
+	send({jungle: jungle, generation: gen});
 	if (lastGen >= 0 && gen >= lastGen) {
-		process.send({type: 'done', data: data});
 		immediate = false;
 	} else {
-		process.send({type: 'data', data: data});
 		immediate = setImmediate(generation);
 	}
 }

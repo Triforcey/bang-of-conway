@@ -18,8 +18,9 @@
 		<button onclick="sendReq();">Send</button>
 	</div>
 	<div class="toolbar">
-		<input type="number" id="genInput" value="0" min="0" max="0" placeholder="Generation" oninput="revSliderShare();">
+		<input type="number" id="genInput" min="0" max="0" placeholder="Generation" oninput="revSliderShare();">
 		<input type="range" id="genInputRange" value="0" min="0" max="0" oninput="sliderShare();">
+		<input type="number" id="viewInput" value="10" placeholder="Rendered">
 	</div>
 	<p style="display: inline-block; margin: 0 2px 0 5px;">Status:</p>
 	<p id="statusOut" style="display: inline-block; margin: 0 2px 0 0;">connecting...</p>
