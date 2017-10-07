@@ -3,8 +3,10 @@ var app = express();
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 var childProcess = require('child_process');
+var fs = require('fs');
+var rimraf = require('rimraf');
+var JSONStream = require('JSONStream');
 
-var universeData = [];
 var maxGen = 0;
 var universe = false;
 var status = 'idle';
@@ -14,9 +16,15 @@ function setStatus(newStatus) {
 }
 function runUniverse(settings) {
 	if (universe) universe.kill();
+	if (fs.existsSync('universe-data')) {
+		rimraf.sync('universe-data');
+	}
+	fs.mkdirSync('universe-data');
 	universe = childProcess.fork('universe.js');
 	var construct;
 	var lengths = [];
+	var readStream;
+	var writeStream;
 	universe.on('message', function (msg) {
 		switch (msg.type) {
 			case 'init':
@@ -40,9 +48,12 @@ function runUniverse(settings) {
 				}
 				break;
 			case 'end':
-				universeData.push(construct);
-				maxGen = construct.generation;
 				lengths = [];
+				readStream = fs.createWriteStream('universe-data/' + (construct.generation));
+				writeStream = JSONStream.stringify(false);
+				writeStream.pipe(readStream);
+				writeStream.write(construct);
+				maxGen = construct.generation;
 				io.emit('maxGen', maxGen);
 				break;
 			case 'finished':
@@ -65,7 +76,6 @@ io.on('connection', function (ws) {
 		msg.size[0] = Math.abs(parseInt(msg.size[0]));
 		msg.size[1] = Math.abs(parseInt(msg.size[1]));
 		maxGen = 0;
-		universeData = [];
 		msg.cmd = 'start';
 		runUniverse(msg);
 		setStatus('running');
@@ -74,16 +84,18 @@ io.on('connection', function (ws) {
 		if (msg == null || msg.constructor != Array || msg.length != 2 || isNaN(parseInt(msg[0])) || isNaN(parseInt(msg[1]))) return;
 		msg[0] = Math.abs(parseInt(msg[0]));
 		msg[1] = parseInt(msg[1]);
-		if (msg[0] < universeData.length) {
-			var res = [...universeData[msg[0]].jungle];
-			if (msg[1] < 0) {
-				msg[1] = -msg[1];
-				res.reverse();
-			}
-			if (msg[1] > 0) {
-				res.splice(msg[1], res.length - msg[1]);
-			}
-			ws.emit('gen', res);
+		if (fs.existsSync('universe-data/' + msg[0])) {
+			fs.readFile('universe-data/' + msg[0], function (err, data) {
+				var res = JSON.parse(data).jungle;
+				if (msg[1] < 0) {
+					msg[1] = -msg[1];
+					res.reverse();
+				}
+				if (msg[1] > 0) {
+					res.splice(msg[1], res.length - msg[1]);
+				}
+				ws.emit('gen', res);
+				});
 		}
 		else ws.emit('gen', null);
 	});
