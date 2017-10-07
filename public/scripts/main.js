@@ -22,6 +22,16 @@ ws.on('status', function (msg) {
 	statusOut.innerHTML = msg;
 });
 
+ws.on('settings', function (msg) {
+	countInput.value = msg.count;
+	widthInput.value = msg.size[0];
+	heightInput.value = msg.size[1];
+	fillInput.value = msg.fill;
+	setGenInput.value = msg.generations;
+	temperInput.value = msg.temper;
+	mutationInput.value = msg.mutation;
+});
+
 ws.on('gen', function (msg) {
 	if (msg == null) return;
 	creatureContainer.innerHTML = '';

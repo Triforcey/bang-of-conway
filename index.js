@@ -20,9 +20,10 @@ function runUniverse(settings) {
 		rimraf.sync('universe-data');
 	}
 	fs.mkdirSync('universe-data');
+	fs.writeFileSync('universe-data/settings', JSON.stringify(settings));
+	settings.cmd = 'start';
 	universe = childProcess.fork('universe.js');
 	var construct;
-	var lengths = [];
 	var readStream;
 	var writeStream;
 	universe.on('message', function (msg) {
@@ -31,18 +32,15 @@ function runUniverse(settings) {
 				construct = msg.data;
 				break;
 			case 'data':
-				if (!lengths.length) {
+				if (construct.jungle.length <= 1) {
 					construct.jungle.push(msg.data);
-					lengths.push(msg.data.mass);
 				} else {
-					for (var i = 0; i < lengths.length; i++) {
-						if (msg.data.mass >= lengths[i]) {
+					for (var i = 0; i < construct.jungle.length; i++) {
+						if (msg.data.mass >= construct.jungle[i].mass) {
 							construct.jungle.splice(i, 0, msg.data);
-							lengths.splice(i, 0, msg.data.mass);
 							break;
-						} else if (i >= lengths.length - 1) {
+						} else if (i >= construct.jungle.length - 1) {
 							construct.jungle.push(msg.data);
-							lengths.push(msg.data.mass);
 						}
 					}
 				}
@@ -76,7 +74,6 @@ io.on('connection', function (ws) {
 		msg.size[0] = Math.abs(parseInt(msg.size[0]));
 		msg.size[1] = Math.abs(parseInt(msg.size[1]));
 		maxGen = 0;
-		msg.cmd = 'start';
 		runUniverse(msg);
 		setStatus('running');
 	});
@@ -101,6 +98,11 @@ io.on('connection', function (ws) {
 	});
 	ws.emit('maxGen', maxGen);
 	ws.emit('status', status);
+	if (fs.existsSync('universe-data/settings')) {
+		fs.readFile('universe-data/settings', function (err, data) {
+			ws.emit('settings', JSON.parse(data));
+		});
+	}
 });
 
 app.use(express.static('public'));
