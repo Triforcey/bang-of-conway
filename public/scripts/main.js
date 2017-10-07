@@ -1,6 +1,6 @@
 function sliderShare() {
 	genInput.value = genInputRange.value;
-	ws.emit('gen', parseInt(genInput.value));
+	ws.emit('gen', [parseInt(genInput.value), parseInt(viewInput.value)]);
 }
 
 function revSliderShare() {
