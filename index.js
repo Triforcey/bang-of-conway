@@ -28,10 +28,13 @@ function runUniverse(settings) {
 					lengths.push(msg.data.mass);
 				} else {
 					for (var i = 0; i < lengths.length; i++) {
-						if (msg.data.mass >= lengths[i] || i >= lengths.length - 1) {
+						if (msg.data.mass >= lengths[i]) {
 							construct.jungle.splice(i, 0, msg.data);
 							lengths.splice(i, 0, msg.data.mass);
 							break;
+						} else if (i >= lengths.length - 1) {
+							construct.jungle.push(msg.data);
+							lengths.push(msg.data.mass);
 						}
 					}
 				}
