@@ -1,38 +1,52 @@
+var fs = require('fs');
+var JSONStream = require('JSONStream');
+
 var immediate = false;
 var jungle = [];
 var gen;
 var lastGen;
 var temper;
+var split;
 var mutation;
+var expand;
 function send(msg) {
-	var init = {jungle: [], generation: msg.generation};
-	if (typeof msg.jungle != 'undefined') {
-		for (var i = 0; i < msg.jungle.length; i++) {
-			if (i == 0) {
-				init.jungle.push(msg.jungle[i]);
-				process.send({type: 'init', data: init});
-			} else {
-				process.send({type: 'data', data: msg.jungle[i]});
-			}
-		}
-	}
-	process.send({type: 'end'});
+	msg.jungle.sort(function (a, b) {
+		return b.mass - a.mass;
+	});
+	var readStream = fs.createWriteStream('universe-data/' + msg.generation);
+	var writeStream = JSONStream.stringify(false);
+	writeStream.pipe(readStream);
+	writeStream.write(msg);
+	process.send({type: 'generation', data: msg.generation});
 	if (lastGen >= 0 && gen >= lastGen) process.send({type: 'finished'});
 }
 function start(count, size, fill) {
 	immediate = true;
 	for (var i = 0; i < count; i++) {
 		var creature = {body: [], mass: 0};
+		var border = [];
+		if (expand) {	
+			for (var j = 0; j < size[1]; j++) {
+				border.push(0);
+			}
+			creature.body.push(border);
+		}
 		for (var j = 0; j < size[0]; j++) {
-			var row = [];
+			var column = [];
+			if (expand) column.push(0);
 			for (var k = 0; k < size[1]; k++) {
 				var cell = Math.random() < fill ? true : false;
-				row.push(cell);
+				column.push(cell);
 				if (cell) creature.mass++;
 			}
-			creature.body.push(row);
+			if (expand) column.push(0);
+			creature.body.push(column);
 		}
-		creature.premature = JSON.parse(JSON.stringify(creature));
+		creature.body.push(border);
+		creature.premature = {body: [...creature.body], mass: creature.mass};
+		for (var j = 0; j < creature.premature.body.length; j++) {
+			creature.premature.body[j] = [...creature.premature.body[j]];
+		}
 		jungle.push(creature);
 	}
 	send({jungle: jungle, generation: gen});
@@ -64,6 +78,7 @@ function generation() {
 	// modify bodies
 	for (var i = 0; i < jungle.length; i++) {
 		var oldBody = [...jungle[i].body];
+		var expanded = [false, false, false, false];
 		for (var j = 0; j < jungle[i].body.length; j++) {
 			for (var k = 0; k < jungle[i].body[j].length; k++) {
 				var neighbors = 0;
@@ -84,6 +99,38 @@ function generation() {
 				if (!cell && neighbors == 3) {
 					jungle[i].body[j][k] = true;
 					jungle[i].mass++;
+					if (expand) {
+						var border;
+						if ((j <= 0 && !expanded[0]) || (j >= jungle[i].body.length - 1 && !expanded[1])) {
+							border = new Array(jungle[i].body[j].length).fill(false);
+						}
+						if (j <= 0 && !expanded[0]) {
+							jungle[i].body.unshift(border);
+							oldBody.unshift(border);
+							expanded[0] = true;
+							j++;
+						}
+						if (j >= jungle[i].body.length - 1 && !expanded[1]) {
+							jungle[i].body.push(border);
+							oldBody.push(border);
+							expanded[1] = true;
+						}
+						if (k <= 0) {
+							for (var l = 0; l < jungle[i].body.length; l++ && !expanded[2]) {
+								jungle[i].body[l].unshift(false);
+								oldBody[l].unshift(false);
+								k++;
+							}
+							expanded[2] = true;
+						}
+						if (k >= jungle[i].body[j].length - 1 && !expanded[3]) {
+							for (var l = 0; l < jungle[i].body.length; l++) {
+								jungle[i].body[l].push(false);
+								oldBody[l].push(false);
+							}
+							expanded[3] = true;
+						}
+					}
 				} else if (cell && (neighbors < 2 || neighbors > 3)) {
 					jungle[i].body[j][k] = false;
 					jungle[i].mass--;
@@ -94,7 +141,11 @@ function generation() {
 	// next generation
 	var rookies = [];
 	for (var i = 0; i < jungle.length; i++) {
-		var rookie = JSON.parse(JSON.stringify(jungle[i].premature));
+		if (Math.random() >= split) continue;
+		var rookie = {body: [...jungle[i].premature.body], mass: jungle[i].premature.mass};
+		for (var j = 0; j < rookie.body.length; j++) {
+			rookie.body[j] = [...rookie.body[j]];
+		}
 		for (var j = 0; j < rookie.body.length; j++) {
 			for (var k = 0; k < rookie.body[j].length; k++) {
 				if (!immediate) return;
@@ -105,7 +156,10 @@ function generation() {
 				}
 			}
 		}
-		rookie.premature = JSON.parse(JSON.stringify(rookie));
+		rookie.premature = {body: [...rookie.body], mass: rookie.mass};
+		for (var j = 0; j < rookie.premature.body.length; j++) {
+			rookie.premature.body[j] = [...rookie.premature.body[j]];
+		}
 		rookies.push(rookie);
 	}
 	jungle.push(...rookies);
@@ -127,7 +181,9 @@ process.on('message', function (msg) {
 			gen = 0;
 			lastGen = msg.generations;
 			temper = msg.temper;
+			split = msg.split;
 			mutation = msg.mutation;
+			expand = msg.expand;
 			start(msg.count, msg.size, msg.fill);
 			break;
 		case 'stop':

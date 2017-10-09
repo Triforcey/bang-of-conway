@@ -8,6 +8,9 @@ var rimraf = require('rimraf');
 var JSONStream = require('JSONStream');
 
 var maxGen = 0;
+if (fs.existsSync('universe-data/max-gen')) {
+	maxGen = parseInt(fs.readFileSync('universe-data/max-gen'));
+}
 var universe = false;
 var status = 'idle';
 function setStatus(newStatus) {
@@ -23,35 +26,11 @@ function runUniverse(settings) {
 	fs.writeFileSync('universe-data/settings', JSON.stringify(settings));
 	settings.cmd = 'start';
 	universe = childProcess.fork('universe.js');
-	var construct;
-	var readStream;
-	var writeStream;
 	universe.on('message', function (msg) {
 		switch (msg.type) {
-			case 'init':
-				construct = msg.data;
-				break;
-			case 'data':
-				if (construct.jungle.length <= 1) {
-					construct.jungle.push(msg.data);
-				} else {
-					for (var i = 0; i < construct.jungle.length; i++) {
-						if (msg.data.mass >= construct.jungle[i].mass) {
-							construct.jungle.splice(i, 0, msg.data);
-							break;
-						} else if (i >= construct.jungle.length - 1) {
-							construct.jungle.push(msg.data);
-						}
-					}
-				}
-				break;
-			case 'end':
-				lengths = [];
-				readStream = fs.createWriteStream('universe-data/' + (construct.generation));
-				writeStream = JSONStream.stringify(false);
-				writeStream.pipe(readStream);
-				writeStream.write(construct);
-				maxGen = construct.generation;
+			case 'generation':
+				maxGen = msg.data;
+				fs.writeFileSync('universe-data/max-gen', maxGen);
 				io.emit('maxGen', maxGen);
 				break;
 			case 'finished':
@@ -66,7 +45,7 @@ function runUniverse(settings) {
 io.on('connection', function (ws) {
 	ws.on('run', function (msg) {
 		if (msg == null || msg.constructor != JSON.constructor) return;
-		var values = [['count', Number], ['size', Array], ['fill', Number], ['generations', Number], ['temper', Number], ['mutation', Number]];
+		var values = [['count', Number], ['size', Array], ['fill', Number], ['generations', Number], ['temper', Number], ['split', Number], ['mutation', Number], ['expand', Boolean]];
 		for (var i = 0; i < values.length; i++) {
 			if (typeof msg[values[i][0]] == 'undefined' || msg[values[i][0]] === null || msg[values[i][0]].constructor != values[i][1]) return;
 		}

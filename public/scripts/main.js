@@ -29,7 +29,9 @@ ws.on('settings', function (msg) {
 	fillInput.value = msg.fill;
 	setGenInput.value = msg.generations;
 	temperInput.value = msg.temper;
+	splitInput.value = msg.split;
 	mutationInput.value = msg.mutation;
+	expandInput.checked = msg.expand;
 });
 
 ws.on('gen', function (msg) {
@@ -41,8 +43,8 @@ ws.on('gen', function (msg) {
 		c.classList.add('creature');
 		var ctx = c.getContext('2d');
 		ctx.fillStyle = 'black;'
-		var rect = c.getBoundingClientRect();
-		var size = [rect.width, rect.height];
+		var rect = window.getComputedStyle(c);
+		var size = [parseInt(rect.width), parseInt(rect.height)];
 		c.width = size[0];
 		c.height = size[1];
 		for (var j = 0; j < msg[i].body.length; j++) {
@@ -65,6 +67,6 @@ function sendReq() {
 			return !isNaN(parseInt(e.value)) ? parseInt(e.value) : parseInt(e.min);
 		}
 	}
-	var req = {count: getVal(countInput), size: [getVal(widthInput), getVal(heightInput)], fill: getVal(fillInput, true), generations: getVal(setGenInput), temper: getVal(temperInput, true), mutation: getVal(mutationInput, true)};
+	var req = {count: getVal(countInput), size: [getVal(widthInput), getVal(heightInput)], fill: getVal(fillInput, true), generations: getVal(setGenInput), temper: getVal(temperInput, true), split: getVal(splitInput, true), mutation: getVal(mutationInput, true), expand: expandInput.checked};
 	ws.emit('run', req);
 }

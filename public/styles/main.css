@@ -14,31 +14,47 @@ html, body {
 .settings {
 	text-align: center;
 }
-.settings input[type=number] {
-	margin: 0 0 5px 0;
+.settings p {
+	margin: 0 2px 0 0;
+	padding: 0;
+	display: inline-block;
+	height: 14px;
+	vertical-align: top;
+}
+.settings input[type=checkbox] {
+	height: 14px;
+	margin: 0;
 }
 .toolbar:not(.settings) {
 	display: flex;
 }
-.settings * {
-	width: 90px;
-}
 .settings button {
 	background: #f0f0f0;
-	border: none;
 	border-radius: 2px;
-	box-shadow: 1px 1px 1px black;
-	margin: 0 0 5px 0;
-}
-input[type=number] {
-	width: 100px;
+	width: 90px;
+	height: 18px;
 	box-sizing: border-box;
-	margin 0;
+	margin: 0 0 5px 0;
+	padding: 2px 5px;
+	border: none;
+	box-shadow: 1px 1px 1px black;
+}
+input[type=number], .settings div {
+	border: none;
+	width: 90px;
+	height: 18px;
+	box-sizing: border-box;
+	margin: 0 0 5px 0;
 	padding: 2px 5px;
 	background: white;
 	color: #686868;
-	border: none;
 	box-shadow: 1px 1px 1px black;
+	display: inline-block;
+	vertical-align: middle;
+}
+.settings div {
+	line-height: 14px;
+	width: auto;
 }
 #genInputRange {
 	flex: 1;
