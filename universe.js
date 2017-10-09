@@ -22,12 +22,6 @@ function send(msg) {
 }
 function start(count, size, fill) {
 	immediate = true;
-	var border = [];
-	if (expand) {	
-		for (var j = 0; j < size[1]; j++) {
-			border.push(false);
-		}
-	}
 	for (var i = 0; i < count; i++) {
 		var creature = {body: [], mass: 0};
 		for (var j = 0; j < size[0]; j++) {
@@ -44,8 +38,8 @@ function start(count, size, fill) {
 			creature.premature.body[j] = [...creature.premature.body[j]];
 		}
 		if (expand) {
-			creature.body.unshift([...border]);
-			creature.body.push([...border]);
+			creature.body.unshift(new Array(size[1]).fill(false));
+			creature.body.push(new Array(size[1]).fill(false));
 			for (var j = 0; j < creature.body.length; j++) {
 				creature.body[j].unshift(false);
 				creature.body[j].push(false);

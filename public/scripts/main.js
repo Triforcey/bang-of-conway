@@ -43,7 +43,8 @@ ws.on('gen', function (msg) {
 		c = creatureContainer.appendChild(c);
 		var ctx = c.getContext('2d');
 		var rect = window.getComputedStyle(c);
-		var size = [parseInt(rect.width), parseInt(rect.height)];
+		//var size = [parseInt(rect.width), parseInt(rect.height)];
+		var size = [msg[i].body.length * 100, msg[i].body.length > 0 ? msg[i].body[0].length * 100 : 0];
 		c.width = size[0];
 		c.height = size[1];
 		ctx.fillStyle = 'black';
@@ -51,8 +52,8 @@ ws.on('gen', function (msg) {
 		for (var j = 0; j < msg[i].body.length; j++) {
 			for (var k = 0; k < msg[i].body[j].length; k++) {
 				if (msg[i].body[j][k]) {
-					ctx.lineWidth = Math.min(msg[i].body.length, msg[i].body[j].length) / 10;
 					var offset = [size[0] / msg[i].body.length, size[1] / msg[i].body[j].length];
+					ctx.lineWidth = Math.min(...offset) / 10;
 					var coord = [j * offset[0], k * offset[1]];
 					ctx.fillRect(...coord, ...offset);
 					ctx.strokeRect(...coord, ...offset);
