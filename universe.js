@@ -22,31 +22,35 @@ function send(msg) {
 }
 function start(count, size, fill) {
 	immediate = true;
+	var border = [];
+	if (expand) {	
+		for (var j = 0; j < size[1]; j++) {
+			border.push(false);
+		}
+	}
 	for (var i = 0; i < count; i++) {
 		var creature = {body: [], mass: 0};
-		var border = [];
-		if (expand) {	
-			for (var j = 0; j < size[1]; j++) {
-				border.push(0);
-			}
-			creature.body.push(border);
-		}
 		for (var j = 0; j < size[0]; j++) {
 			var column = [];
-			if (expand) column.push(0);
 			for (var k = 0; k < size[1]; k++) {
 				var cell = Math.random() < fill ? true : false;
 				column.push(cell);
 				if (cell) creature.mass++;
 			}
-			if (expand) column.push(0);
 			creature.body.push(column);
 		}
 		creature.premature = {body: [...creature.body], mass: creature.mass};
 		for (var j = 0; j < creature.premature.body.length; j++) {
 			creature.premature.body[j] = [...creature.premature.body[j]];
 		}
-		creature.body.push(border);
+		if (expand) {
+			creature.body.unshift([...border]);
+			creature.body.push([...border]);
+			for (var j = 0; j < creature.body.length; j++) {
+				creature.body[j].unshift(false);
+				creature.body[j].push(false);
+			}
+		}
 		jungle.push(creature);
 	}
 	send({jungle: jungle, generation: gen});
@@ -78,6 +82,9 @@ function generation() {
 	// modify bodies
 	for (var i = 0; i < jungle.length; i++) {
 		var oldBody = [...jungle[i].body];
+		for (var j = 0; j < oldBody.length; j++) {
+			oldBody[j] = [...oldBody[j]];
+		}
 		var expanded = [false, false, false, false];
 		for (var j = 0; j < jungle[i].body.length; j++) {
 			for (var k = 0; k < jungle[i].body[j].length; k++) {
@@ -115,8 +122,8 @@ function generation() {
 							oldBody.push(border);
 							expanded[1] = true;
 						}
-						if (k <= 0) {
-							for (var l = 0; l < jungle[i].body.length; l++ && !expanded[2]) {
+						if (k <= 0 && !expanded[2]) {
+							for (var l = 0; l < jungle[i].body.length; l++) {
 								jungle[i].body[l].unshift(false);
 								oldBody[l].unshift(false);
 								k++;

@@ -39,20 +39,23 @@ ws.on('gen', function (msg) {
 	creatureContainer.innerHTML = '';
 	for (var i = 0; i < msg.length; i++) {
 		var c = document.createElement('canvas');
-		c = creatureContainer.appendChild(c);
 		c.classList.add('creature');
+		c = creatureContainer.appendChild(c);
 		var ctx = c.getContext('2d');
-		ctx.fillStyle = 'black;'
 		var rect = window.getComputedStyle(c);
 		var size = [parseInt(rect.width), parseInt(rect.height)];
 		c.width = size[0];
 		c.height = size[1];
+		ctx.fillStyle = 'black';
+		ctx.strokeStyle = 'white';
 		for (var j = 0; j < msg[i].body.length; j++) {
 			for (var k = 0; k < msg[i].body[j].length; k++) {
 				if (msg[i].body[j][k]) {
+					ctx.lineWidth = Math.min(msg[i].body.length, msg[i].body[j].length) / 10;
 					var offset = [size[0] / msg[i].body.length, size[1] / msg[i].body[j].length];
 					var coord = [j * offset[0], k * offset[1]];
 					ctx.fillRect(...coord, ...offset);
+					ctx.strokeRect(...coord, ...offset);
 				}
 			}
 		}
