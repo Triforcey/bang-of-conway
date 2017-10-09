@@ -106,14 +106,14 @@ function generation() {
 							border = new Array(jungle[i].body[j].length).fill(false);
 						}
 						if (j <= 0 && !expanded[0]) {
-							jungle[i].body.unshift(border);
-							oldBody.unshift(border);
+							jungle[i].body.unshift([...border]);
+							oldBody.unshift([...border]);
 							expanded[0] = true;
 							j++;
 						}
 						if (j >= jungle[i].body.length - 1 && !expanded[1]) {
-							jungle[i].body.push(border);
-							oldBody.push(border);
+							jungle[i].body.push([...border]);
+							oldBody.push([...border]);
 							expanded[1] = true;
 						}
 						if (k <= 0 && !expanded[2]) {
