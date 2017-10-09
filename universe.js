@@ -104,19 +104,15 @@ function generation() {
 					jungle[i].body[j][k] = true;
 					jungle[i].mass++;
 					if (expand) {
-						var border;
-						if ((j <= 0 && !expanded[0]) || (j >= jungle[i].body.length - 1 && !expanded[1])) {
-							border = new Array(jungle[i].body[j].length).fill(false);
-						}
 						if (j <= 0 && !expanded[0]) {
-							jungle[i].body.unshift([...border]);
-							oldBody.unshift([...border]);
+							jungle[i].body.unshift(new Array(jungle[i].body[j].length).fill(false));
+							oldBody.unshift(new Array(jungle[i].body[j].length).fill(false));
 							expanded[0] = true;
 							j++;
 						}
 						if (j >= jungle[i].body.length - 1 && !expanded[1]) {
-							jungle[i].body.push([...border]);
-							oldBody.push([...border]);
+							jungle[i].body.push(new Array(jungle[i].body[j].length).fill(false));
+							oldBody.push(new Array(jungle[i].body[j].length).fill(false));
 							expanded[1] = true;
 						}
 						if (k <= 0 && !expanded[2]) {
