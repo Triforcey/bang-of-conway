@@ -17,8 +17,10 @@ function send(msg) {
 	var writeStream = JSONStream.stringify(false);
 	writeStream.pipe(readStream);
 	writeStream.write(msg);
-	process.send({type: 'generation', data: msg.generation});
-	if (lastGen >= 0 && gen >= lastGen) process.send({type: 'finished'});
+	readStream.on('finish', function () {
+		process.send({type: 'generation', data: msg.generation});
+		if (lastGen >= 0 && gen >= lastGen) process.send({type: 'finished'});
+	});
 }
 function start(count, size, fill) {
 	immediate = true;
