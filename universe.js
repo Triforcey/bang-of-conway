@@ -42,11 +42,11 @@ function start(count, size, fill) {
 			if (expand) column.push(0);
 			creature.body.push(column);
 		}
-		creature.body.push(border);
 		creature.premature = {body: [...creature.body], mass: creature.mass};
 		for (var j = 0; j < creature.premature.body.length; j++) {
 			creature.premature.body[j] = [...creature.premature.body[j]];
 		}
+		creature.body.push(border);
 		jungle.push(creature);
 	}
 	send({jungle: jungle, generation: gen});
@@ -159,6 +159,17 @@ function generation() {
 		rookie.premature = {body: [...rookie.body], mass: rookie.mass};
 		for (var j = 0; j < rookie.premature.body.length; j++) {
 			rookie.premature.body[j] = [...rookie.premature.body[j]];
+		}
+		if (expand) {
+			if (rookie.body.length > 0) {
+				var border = new Array(rookie.body[0].length).fill(false);
+				rookie.body.unshift(border);
+				rookie.body.push(border);
+			}
+			for (var j = 0; j < rookie.body.length; j++) {
+				rookie.body[j].unshift(false);
+				rookie.body[j].push(false);
+			}
 		}
 		rookies.push(rookie);
 	}
