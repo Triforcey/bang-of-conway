@@ -14,13 +14,14 @@ function send(msg) {
 		return b.mass - a.mass;
 	});
 	var readStream = fs.createWriteStream('universe-data/' + msg.generation);
+	readStream.on('close', function () {
+		process.send({type: 'generation', data: msg.generation});
+		if (lastGen >= 0 && msg.generation >= lastGen) process.send({type: 'finished'});
+	});
 	var writeStream = JSONStream.stringify(false);
 	writeStream.pipe(readStream);
 	writeStream.write(msg);
-	readStream.on('finish', function () {
-		process.send({type: 'generation', data: msg.generation});
-		if (lastGen >= 0 && gen >= lastGen) process.send({type: 'finished'});
-	});
+	readStream.close();
 }
 function start(count, size, fill) {
 	immediate = true;
