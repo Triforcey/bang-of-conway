@@ -66,15 +66,17 @@ io.on('connection', function (ws) {
 		msg[1] = parseInt(msg[1]);
 		if (genIndex.indexOf(msg[0]) >= 0) {
 			fs.readFile('universe-data/' + msg[0], function (err, data) {
-				var res = JSON.parse(data).jungle;
-				if (msg[1] < 0) {
-					msg[1] = -msg[1];
-					res.reverse();
-				}
-				if (msg[1] > 0) {
-					res.splice(msg[1], res.length - msg[1]);
-				}
-				ws.emit('gen', res);
+				try {
+					var res = JSON.parse(data).jungle;
+					if (msg[1] < 0) {
+						msg[1] = -msg[1];
+						res.reverse();
+					}
+					if (msg[1] > 0) {
+						res.splice(msg[1], res.length - msg[1]);
+					}
+					ws.emit('gen', res);
+				} catch (e) {}
 				});
 		}
 		else ws.emit('gen', null);

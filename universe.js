@@ -14,14 +14,11 @@ function send(msg) {
 		return b.mass - a.mass;
 	});
 	var readStream = fs.createWriteStream('universe-data/' + msg.generation);
-	readStream.on('close', function () {
-		process.send({type: 'generation', data: msg.generation});
-		if (lastGen >= 0 && msg.generation >= lastGen) process.send({type: 'finished'});
-	});
 	var writeStream = JSONStream.stringify(false);
 	writeStream.pipe(readStream);
 	writeStream.write(msg);
-	readStream.close();
+	process.send({type: 'generation', data: msg.generation});
+	if (lastGen >= 0 && msg.generation >= lastGen) process.send({type: 'finished'});
 }
 function start(count, size, fill) {
 	immediate = true;
@@ -106,35 +103,35 @@ function generation() {
 					jungle[i].body[j][k] = true;
 					jungle[i].mass++;
 					if (expand) {
-						if (j <= 0 && !expanded[0]) {
-							jungle[i].body.unshift(new Array(jungle[i].body[j].length).fill(false));
-							oldBody.unshift(new Array(jungle[i].body[j].length).fill(false));
-							expanded[0] = true;
-						}
-						if (j >= jungle[i].body.length - 1 && !expanded[1]) {
-							jungle[i].body.push(new Array(jungle[i].body[j].length).fill(false));
-							oldBody.push(new Array(jungle[i].body[j].length).fill(false));
-							expanded[1] = true;
-						}
-						if (k <= 0 && !expanded[2]) {
-							for (var l = 0; l < jungle[i].body.length; l++) {
-								jungle[i].body[l].unshift(false);
-								oldBody[l].unshift(false);
-							}
-							expanded[2] = true;
-						}
-						if (k >= jungle[i].body[j].length - 1 && !expanded[3]) {
-							for (var l = 0; l < jungle[i].body.length; l++) {
-								jungle[i].body[l].push(false);
-								oldBody[l].push(false);
-							}
-							expanded[3] = true;
-						}
+						if (j <= 0) expanded[0] = true;
+						if (j >= jungle[i].body.length - 1) expanded[1] = true;
+						if (k <= 0) expanded[2] = true;
+						if (k >= jungle[i].body[j].length - 1) expanded[3] = true;
 					}
 				} else if (cell && (neighbors < 2 || neighbors > 3)) {
 					jungle[i].body[j][k] = false;
 					jungle[i].mass--;
 				}
+			}
+		}
+		if (expanded[0]) {
+			jungle[i].body.unshift(new Array(jungle[i].body[0].length).fill(false));
+			oldBody.unshift(new Array(jungle[i].body[0].length).fill(false));
+		}
+		if (expanded[1]) {
+			jungle[i].body.push(new Array(jungle[i].body[0].length).fill(false));
+			oldBody.push(new Array(jungle[i].body[0].length).fill(false));
+		}
+		if (expanded[2]) {
+			for (var l = 0; l < jungle[i].body.length; l++) {
+				jungle[i].body[l].unshift(false);
+				oldBody[l].unshift(false);
+			}
+		}
+		if (expanded[3]) {
+			for (var l = 0; l < jungle[i].body.length; l++) {
+				jungle[i].body[l].push(false);
+				oldBody[l].push(false);
 			}
 		}
 	}
@@ -163,8 +160,8 @@ function generation() {
 		if (expand) {
 			if (rookie.body.length > 0) {
 				var border = new Array(rookie.body[0].length).fill(false);
-				rookie.body.unshift(border);
-				rookie.body.push(border);
+				rookie.body.unshift(border.slice());
+				rookie.body.push(border.slice());
 			}
 			for (var j = 0; j < rookie.body.length; j++) {
 				rookie.body[j].unshift(false);
