@@ -11,8 +11,8 @@ if (!fs.existsSync('universe-data')) {
 	fs.mkdirSync('universe-data');
 }
 var genIndex = [];
-if (fs.existsSync('universe-data/genIndex')) {
-	genIndex = JSON.parse(fs.readFileSync('universe-data/genIndex'));
+if (fs.existsSync('universe-data/gen-index')) {
+	genIndex = JSON.parse(fs.readFileSync('universe-data/gen-index'));
 }
 var universe = false;
 var status = 'idle';

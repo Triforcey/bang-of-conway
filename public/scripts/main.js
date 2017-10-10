@@ -43,7 +43,7 @@ ws.on('gen', function (msg) {
 		c = creatureContainer.appendChild(c);
 		var ctx = c.getContext('2d');
 		var rect = window.getComputedStyle(c);
-		var size = [msg[i].body.length * 100, msg[i].body.length > 0 ? msg[i].body[0].length * 100 : 0];
+		var size = [c.clientWidth * window.devicePixelRatio, c.clientHeight * window.devicePixelRatio];
 		c.width = size[0];
 		c.height = size[1];
 		ctx.fillStyle = 'black';
