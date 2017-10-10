@@ -37,8 +37,6 @@ function runUniverse(settings) {
 				io.emit('maxGen', Math.max(...genIndex));
 				break;
 			case 'finished':
-				universe.kill();
-				universe = false;
 				setStatus('idle');
 		}
 	});

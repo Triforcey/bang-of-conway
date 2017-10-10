@@ -13,10 +13,10 @@ function send(msg) {
 	msg.jungle.sort(function (a, b) {
 		return b.mass - a.mass;
 	});
-	var readStream = fs.createWriteStream('universe-data/' + msg.generation);
-	var writeStream = JSONStream.stringify(false);
-	writeStream.pipe(readStream);
-	writeStream.write(msg);
+	var writeStream = fs.createWriteStream('universe-data/' + msg.generation);
+	var readStream = JSONStream.stringify(false);
+	readStream.pipe(writeStream);
+	readStream.write(msg);
 	process.send({type: 'generation', data: msg.generation});
 	if (lastGen >= 0 && msg.generation >= lastGen) process.send({type: 'finished'});
 }
