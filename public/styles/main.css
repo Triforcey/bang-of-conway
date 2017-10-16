@@ -36,8 +36,10 @@ html, body {
 	box-sizing: border-box;
 	margin: 0 0 5px 0;
 	padding: 2px 5px;
+	line-height: 0;
 	border: none;
 	box-shadow: 1px 1px 1px black;
+	vertical-align: middle;
 }
 input[type=number], .settings div {
 	border: none;
@@ -72,4 +74,5 @@ input[type=number], .settings div {
 	max-height: calc(100% - 22px);
 	border: solid black 2px;
 	padding: 5px;
+	vertical-align: middle;
 }
