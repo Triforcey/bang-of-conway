@@ -4,9 +4,7 @@ class Creature {
    * @param {Boolean} growing - If the coordinate plane may grow as needed
    * @param {Array} activeCells - A list of coordinates in [x, y] form of activated cells
    */
-  constructor(initSize, growing, activeCells) {
-    this.size = initSize;
-    this.growing = growing;
+  constructor(activeCells) {
     this.activeCellMap = {};
     activeCells.forEach(cell => this.activeCellMap[cell.join(',')] = true);
   }
@@ -44,3 +42,5 @@ class Creature {
     activateCells();
   }
 }
+
+exports.Creature = Creature;
