@@ -11,6 +11,9 @@ class Creature {
   get activeCells() {
     return Object.keys(this.activeCellMap).map(cell => cell.split(','));
   }
+  get mass() {
+    return this.activeCells.length;
+  }
   step() {
     function forEachSurroundingCell(cell, callback) {
       for (let i = -1; i <= 1; i++) {
