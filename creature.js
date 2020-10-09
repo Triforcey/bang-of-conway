@@ -7,6 +7,7 @@ class Creature {
   constructor(activeCells) {
     this.activeCellMap = {};
     activeCells.forEach(cell => this.activeCellMap[cell.join(',')] = true);
+    this.initialStage = activeCells;
   }
   get activeCells() {
     return Object.keys(this.activeCellMap).map(cell => cell.split(','));
