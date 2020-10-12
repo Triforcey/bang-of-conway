@@ -52,7 +52,7 @@ class Creature {
   }
   toJSON() {
     return {
-      initialState: this.initialStage,
+      initialStage: this.initialStage,
       activeCells: this.activeCells,
       mass: this.mass
     };
