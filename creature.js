@@ -10,7 +10,13 @@ class Creature {
     this.initialStage = activeCells;
   }
   get activeCells() {
-    return Object.keys(this.activeCellMap).map(cell => cell.split(','));
+    return Object.keys(this.activeCellMap).map(cell => {
+      cell = cell.split(',');
+      cell.forEach((coord, i) => {
+        cell[i] = JSON.parse(coord);
+      });
+      return cell;
+    });
   }
   get mass() {
     return this.activeCells.length;
@@ -44,6 +50,13 @@ class Creature {
       });
     };
     activateCells();
+  }
+  toJSON() {
+    return {
+      initialState: this.initialStage,
+      activeCells: this.activeCells,
+      mass: this.mass
+    };
   }
 }
 
