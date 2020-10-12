@@ -87,8 +87,12 @@ function generation() {
 				}
 			}
 		}
-		initialStage.forEach((item, i) => {
-			initialStage[i] = item.split(',');
+		initialStage.forEach((item, j) => {
+			item = item.split(',');
+			item.forEach((coord, k) => {
+				item[k] = parseInt(coord);
+			});
+			initialStage[j] = item;
 		});
 		const rookie = new Creature(initialStage);
 		rookies.push(rookie);
