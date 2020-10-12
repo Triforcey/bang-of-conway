@@ -35,19 +35,18 @@ class Creature {
       const potentialCells = {};
       this.activeCells.forEach(cell => {
         forEachSurroundingCell(cell, neighborCell => {
-          let potentialCellScore = potentialCells[neighborCell.join(',')];
-          if (potentialCellScore == undefined) potentialCellScore = 1;
-          else potentialCellScore++;
-          potentialCells[neighborCell.join(',')] = potentialCellScore;
+          let address = neighborCell.join(',');
+          if (potentialCells[address] == undefined) potentialCells[address] = 1;
+          else potentialCells[address]++;
         });
       });
+      const cellMap = {};
       Object.keys(potentialCells).forEach(cellAddress => {
-        const cellMap = {};
         const cellScore = potentialCells[cellAddress];
         if (cellScore == 2 && this.activeCellMap[cellAddress]) cellMap[cellAddress] = true;
         else if (cellScore == 3) cellMap[cellAddress] = true;
-        this.activeCellMap = cellMap;
       });
+      this.activeCellMap = cellMap;
     };
     activateCells();
   }
