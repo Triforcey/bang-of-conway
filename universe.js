@@ -118,7 +118,6 @@ process.on('message', function (msg) {
 			temper = msg.temper;
 			split = msg.split;
 			mutation = msg.mutation;
-			expand = msg.expand;
 			start(msg.count, msg.size, msg.fill);
 			break;
 		case 'stop':

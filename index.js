@@ -46,7 +46,7 @@ function runUniverse(settings) {
 io.on('connection', function (ws) {
 	ws.on('run', function (msg) {
 		if (msg == null || msg.constructor != JSON.constructor) return;
-		var values = [['count', Number], ['size', Array], ['fill', Number], ['generations', Number], ['temper', Number], ['split', Number], ['mutation', Number], ['expand', Boolean]];
+		var values = [['count', Number], ['size', Array], ['fill', Number], ['generations', Number], ['temper', Number], ['split', Number], ['mutation', Number]];
 		for (var i = 0; i < values.length; i++) {
 			if (typeof msg[values[i][0]] == 'undefined' || msg[values[i][0]] === null || msg[values[i][0]].constructor != values[i][1]) return;
 		}

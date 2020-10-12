@@ -31,7 +31,6 @@ ws.on('settings', function (msg) {
 	temperInput.value = msg.temper;
 	splitInput.value = msg.split;
 	mutationInput.value = msg.mutation;
-	expandInput.checked = msg.expand;
 });
 
 ws.on('gen', function (msg) {
@@ -90,6 +89,6 @@ function sendReq() {
 			return !isNaN(parseInt(e.value)) ? parseInt(e.value) : parseInt(e.min);
 		}
 	}
-	var req = {count: getVal(countInput), size: [getVal(widthInput), getVal(heightInput)], fill: getVal(fillInput, true), generations: getVal(setGenInput), temper: getVal(temperInput, true), split: getVal(splitInput, true), mutation: getVal(mutationInput, true), expand: expandInput.checked};
+	var req = {count: getVal(countInput), size: [getVal(widthInput), getVal(heightInput)], fill: getVal(fillInput, true), generations: getVal(setGenInput), temper: getVal(temperInput, true), split: getVal(splitInput, true), mutation: getVal(mutationInput, true)};
 	ws.emit('run', req);
 }
