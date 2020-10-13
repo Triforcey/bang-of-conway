@@ -36,7 +36,7 @@ ws.on('settings', function (msg) {
 ws.on('gen', function (msg) {
 	if (msg == null) return;
 	creatureContainer.innerHTML = '';
-	for (var i = 0; i < msg.length; i++) {
+	for (let i = 0; i < msg.length; i++) {
 		const cells = msg[i].activeCells;
 		const boundaries = [[0, 0], [0, 0]];
 		cells.forEach(cell => {
@@ -46,38 +46,24 @@ ws.on('gen', function (msg) {
 			});
 		});
 		const size = boundaries.map(boundary => boundary[1] - boundary[0] + 1);
-		const body = [];
-		for (let j = 0; j < size[0]; j++) {
-			const row = [];
-			for (let k = 0; k < size[1]; k++) {
-				row.push(false);
-			}
-			body.push(row);
-		}
-		cells.forEach(cell => {
-			body[cell[0] - boundaries[0][0]][cell[1] - boundaries[1][0]] = true;
-		});
-		var c = document.createElement('canvas');
+		let c = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 		c.classList.add('creature');
 		c = creatureContainer.appendChild(c);
-		var ctx = c.getContext('2d');
-		var rect = window.getComputedStyle(c);
-		var cSize = [c.clientWidth * window.devicePixelRatio, c.clientHeight * window.devicePixelRatio];
-		c.width = cSize[0];
-		c.height = cSize[1];
-		ctx.fillStyle = 'black';
-		ctx.strokeStyle = 'white';
-		for (var j = 0; j < body.length; j++) {
-			for (var k = 0; k < body[j].length; k++) {
-				if (body[j][k]) {
-					var offset = [cSize[0] / body.length, cSize[1] / body[j].length];
-					ctx.lineWidth = Math.min(...offset) / 10;
-					var coord = [j * offset[0], k * offset[1]];
-					ctx.fillRect(...coord, ...offset);
-					ctx.strokeRect(...coord, ...offset);
-				}
-			}
-		}
+		const rect = window.getComputedStyle(c);
+		const cSize = [c.clientWidth * window.devicePixelRatio, c.clientHeight * window.devicePixelRatio];
+		c.setAttribute('width', cSize[0]);
+		c.setAttribute('height', cSize[1]);
+		const cellSize = [cSize[0] / size[0], cSize[1] / size[1]];
+		cells.forEach(cell => {
+			const coords = cell.map((coord, j) => coord - boundaries[j][0]);
+			const square = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+			square.setAttribute('x', coords[0] * cellSize[0]);
+			square.setAttribute('y', coords[1] * cellSize[1]);
+			square.setAttribute('width', cellSize[0]);
+			square.setAttribute('height', cellSize[1]);
+			square.setAttribute('fill', 'black');
+			c.appendChild(square);
+		});
 	}
 });
 
