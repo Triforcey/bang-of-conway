@@ -75,7 +75,7 @@ io.on('connection', function (ws) {
 					}
 					ws.emit('gen', res);
 				} catch (e) {}
-				});
+			});
 		}
 		else ws.emit('gen', null);
 	});
