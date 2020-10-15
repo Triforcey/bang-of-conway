@@ -48,7 +48,7 @@ ws.on('gen', function (msg) {
 		const size = boundaries.map(boundary => boundary[1] - boundary[0] + 1);
 		let c = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 		c.classList.add('creature');
-		c.setAttribute('easypz', '{"modes": ["FLICK_PAN", "WHEEL_ZOOM", "PINCH_ZOOM", "DBLCLICK_ZOOM_IN", "DBLRIGHTCLICK_ZOOM_OUT"]}');
+		c.setAttribute('easypz', '{"applyTransformTo": "svg > *", "modes": ["FLICK_PAN", "WHEEL_ZOOM", "PINCH_ZOOM", "DBLCLICK_ZOOM_IN", "DBLRIGHTCLICK_ZOOM_OUT"]}');
 		c = creatureContainer.appendChild(c);
 		const rect = window.getComputedStyle(c);
 		const cSize = [c.clientWidth * window.devicePixelRatio, c.clientHeight * window.devicePixelRatio];

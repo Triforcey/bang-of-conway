@@ -10,9 +10,9 @@ var JSONStream = require('JSONStream');
 if (!fs.existsSync('universe-data')) {
 	fs.mkdirSync('universe-data');
 }
-var genIndex = [];
-if (fs.existsSync('universe-data/gen-index')) {
-	genIndex = JSON.parse(fs.readFileSync('universe-data/gen-index'));
+let lastGen = null;
+if (fs.existsSync('universe-data/last-gen')) {
+	lastGen = JSON.parse(fs.readFileSync('universe-data/last-gen'));
 }
 var universe = false;
 var status = 'idle';
@@ -32,9 +32,9 @@ function runUniverse(settings) {
 	universe.on('message', function (msg) {
 		switch (msg.type) {
 			case 'generation':
-				genIndex.push(msg.data);
-				fs.writeFileSync('universe-data/gen-index', JSON.stringify(genIndex));
-				io.emit('maxGen', Math.max(...genIndex));
+				lastGen = msg.data;
+				fs.writeFileSync('universe-data/last-gen', JSON.stringify(lastGen));
+				io.emit('maxGen', lastGen);
 				break;
 			case 'finished':
 				setStatus('idle');
@@ -53,8 +53,8 @@ io.on('connection', function (ws) {
 		if (msg.size.length != 2 || isNaN(msg.size[0]) || isNaN(msg.size[1])) return;
 		msg.size[0] = Math.abs(parseInt(msg.size[0]));
 		msg.size[1] = Math.abs(parseInt(msg.size[1]));
-		genIndex = [];
-		fs.writeFileSync('universe-data/gen-index', JSON.stringify(genIndex));
+		lastGen = null;
+		fs.writeFileSync('universe-data/last-gen', JSON.stringify(lastGen));
 		runUniverse(msg);
 		setStatus('running');
 	});
@@ -62,7 +62,7 @@ io.on('connection', function (ws) {
 		if (msg == null || msg.constructor != Array || msg.length != 2 || isNaN(parseInt(msg[0])) || isNaN(parseInt(msg[1]))) return;
 		msg[0] = Math.abs(parseInt(msg[0]));
 		msg[1] = parseInt(msg[1]);
-		if (genIndex.indexOf(msg[0]) >= 0) {
+		if (msg[0] <= lastGen) {
 			fs.readFile('universe-data/' + msg[0], function (err, data) {
 				try {
 					var res = JSON.parse(data).jungle;
@@ -79,7 +79,7 @@ io.on('connection', function (ws) {
 		}
 		else ws.emit('gen', null);
 	});
-	if (genIndex.length) ws.emit('maxGen', Math.max(...genIndex));
+	if (lastGen != null) ws.emit('maxGen', lastGen);
 	ws.emit('status', status);
 	if (fs.existsSync('universe-data/settings')) {
 		fs.readFile('universe-data/settings', function (err, data) {

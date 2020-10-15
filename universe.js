@@ -18,7 +18,7 @@ function send(msg) {
 	var writeStream = fs.createWriteStream('universe-data/' + msg.generation);
 	var readStream = JSONStream.stringify(false);
 	readStream.pipe(writeStream);
-	readStream.write(msg);
+	readStream.end(msg);
 	process.send({type: 'generation', data: msg.generation});
 	if (lastGen >= 0 && msg.generation >= lastGen) process.send({type: 'finished'});
 }
